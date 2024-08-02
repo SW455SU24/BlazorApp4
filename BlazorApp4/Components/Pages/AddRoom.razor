@@ -1,0 +1,53 @@
+﻿@page "/AddRoom"
+@rendermode InteractiveServer
+@using BlazorApp4.Data
+@inject RoomService RoomService
+
+<PageTitle>Add Room</PageTitle>
+
+<h1>Add Room</h1>
+
+<EditForm Model="newRoom" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="isSpecial">Is Special:</label>
+        <InputCheckbox id="isSpecial" class="form-control" @bind-Value="newRoom.IsSpecial" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Room</button>
+</EditForm>
+
+<h3>Existing Rooms</h3>
+<ul>
+    @if (rooms != null)
+    {
+        @foreach (var room in rooms)
+        {
+            <li>@room.Id</li>
+        }
+    }
+    else
+    {
+        <li>Loading...</li>
+    }
+</ul>
+
+@code {
+    private Room newRoom = new Room();
+    private List<Room> rooms = new List<Room>(); // Initialize the list
+
+    protected override async Task OnInitializedAsync()
+    {
+        rooms = await RoomService.GetRoomsAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await RoomService.AddRoomAsync(newRoom);
+        newRoom = new Room(); // Reset the form
+
+        rooms = await RoomService.GetRoomsAsync(); // Refresh the list
+    }
+}
