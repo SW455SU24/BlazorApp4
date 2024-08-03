@@ -11,9 +11,9 @@
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div class="form-group">
-        <label for="isSpecial">Is Special:</label>
-        <InputCheckbox id="isSpecial" class="form-control" @bind-Value="newRoom.IsSpecial" />
+    <div class="form-group form-check">
+        <InputCheckbox id="isSpecial" class="form-check-input" @bind-Value="newRoom.IsSpecial" />
+        <label class="form-check-label" for="isSpecial">Is Special</label>
     </div>
 
     <button type="submit" class="btn btn-primary">Add Room</button>

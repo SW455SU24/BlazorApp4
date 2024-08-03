@@ -28,6 +28,25 @@
                 <label for="phone-number" class="form-label">Phone number</label>
                 <ValidationMessage For="() => Input.PhoneNumber" class="text-danger" />
             </div>
+
+
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.FirstName" class="form-control" placeholder="Please enter your first name" />
+                <label for="firstName" class="form-label">First Name</label>
+                <ValidationMessage For="() => Input.FirstName" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.lastName" class="form-control" placeholder="Please enter your last name" />
+                <label for="lastName" class="form-label">Last Name</label>
+                <ValidationMessage For="() => Input.lastName" class="text-danger" />
+            </div>
+
+
+
+
+
             <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
         </EditForm>
     </div>
@@ -37,6 +56,8 @@
     private ApplicationUser user = default!;
     private string? username;
     private string? phoneNumber;
+    private string? firstName;
+    private string? lastName;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -49,8 +70,12 @@
         user = await UserAccessor.GetRequiredUserAsync(HttpContext);
         username = await UserManager.GetUserNameAsync(user);
         phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+        firstName = user.FirstName;
+        lastName = user.LastName;
 
         Input.PhoneNumber ??= phoneNumber;
+        Input.FirstName ??= firstName;
+        Input.lastName ??= lastName;
     }
 
     private async Task OnValidSubmitAsync()
@@ -64,6 +89,18 @@
             }
         }
 
+        if(Input.FirstName != firstName)
+        {
+            user.FirstName = Input.FirstName;
+            await UserManager.UpdateAsync(user);
+        }
+
+        if (Input.lastName != lastName)
+        {
+            user.LastName = Input.lastName;
+            await UserManager.UpdateAsync(user);
+        }
+
         await SignInManager.RefreshSignInAsync(user);
         RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
     }
@@ -73,5 +110,11 @@
         [Phone]
         [Display(Name = "Phone number")]
         public string? PhoneNumber { get; set; }
+
+        [Display(Name = "First name")]
+        public string? FirstName { get; set; }
+
+        [Display(Name = "Last name")]
+        public string? lastName { get; set; }
     }
 }

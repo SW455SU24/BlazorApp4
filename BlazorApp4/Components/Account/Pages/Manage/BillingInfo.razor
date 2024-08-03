@@ -1,0 +1,218 @@
+﻿@page "/Account/Manage/BillingInfo"
+
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@using BlazorApp4.Data
+
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject IdentityUserAccessor UserAccessor
+@inject IdentityRedirectManager RedirectManager
+@inject ILogger<ChangePassword> Logger
+
+<PageTitle>Billing Information</PageTitle>
+
+<h3>Billing Information</h3>
+<StatusMessage />
+
+<div class="row">
+    <div class="col-md-6">
+        <EditForm Model="Input" FormName="profile" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.billingAddress" class="form-control" placeholder="Please enter your billing address" />
+                <label for="billingAddress" class="form-label">Billing Address</label>
+                <ValidationMessage For="() => Input.billingAddress" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.billingCity" class="form-control" placeholder="Please enter your billing city" />
+                <label for="billingCity" class="form-label">Billing City</label>
+                <ValidationMessage For="() => Input.billingCity" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.billingState" class="form-control" placeholder="Please enter your billing state" />
+                <label for="billingState" class="form-label">Billing State</label>
+                <ValidationMessage For="() => Input.billingState" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.billingZip" class="form-control" placeholder="Please enter your billing zip code" />
+                <label for="billingZip" class="form-label">Billing Zip</label>
+                <ValidationMessage For="() => Input.billingZip" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.billingCountry" class="form-control" placeholder="Please enter your billing country" />
+                <label for="billingCountry" class="form-label">Billing Country</label>
+                <ValidationMessage For="() => Input.billingCountry" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.creditCardNo" class="form-control" placeholder="Please enter your credit card number" />
+                <label for="creditCardNo" class="form-label">Credit Card No.</label>
+                <ValidationMessage For="() => Input.creditCardNo" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.creditCardExp" class="form-control" placeholder="Please enter your credit card expiration date" />
+                <label for="creditCardExp" class="form-label">Credit Card Expiration Date</label>
+                <ValidationMessage For="() => Input.creditCardExp" class="text-danger" />
+            </div>
+
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.creditCardCvv" class="form-control" placeholder="Please enter your credit card CVV" />
+                <label for="creditCardCvv" class="form-label">Credit Card CVV</label>
+                <ValidationMessage For="() => Input.creditCardCvv" class="text-danger" />
+            </div>
+
+
+
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Save</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private ApplicationUser user = default!;
+    private string? billingAddress;
+    private string? billingCity;
+    private string? billingState;
+    private string? billingZip;
+    private string? billingCountry;
+    private string? creditCardNo;
+    private string? creditCardExp;
+    private string? creditCardCvv;
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+        billingAddress = user.BillingAddress;
+        billingCity = user.BillingCity;
+        billingState = user.BillingState;
+        billingZip = user.BillingZip;
+        billingCountry = user.BillingCountry;
+        creditCardNo = user.CreditCardNo;
+        creditCardExp = user.CreditCardExp;
+        creditCardCvv = user.CreditCardCvv;
+
+        Input.billingAddress ??= billingAddress;
+        Input.billingCity ??= billingCity;
+        Input.billingState ??= billingState;
+        Input.billingZip ??= billingZip;
+        Input.billingCountry ??= billingCountry;
+        Input.creditCardNo ??= creditCardNo;
+        Input.creditCardExp ??= creditCardExp;
+        Input.creditCardCvv ??= creditCardCvv;
+
+    }
+
+    private async Task OnValidSubmitAsync()
+    {
+        Boolean flag = false;
+        if (Input.billingAddress != billingAddress)
+        {
+            user.BillingAddress = Input.billingAddress;
+            flag = true;
+            //await UserManager.UpdateAsync(user);
+        }
+
+        if (Input.billingCity != billingCity)
+        {
+            user.BillingCity = Input.billingCity;
+            flag = true;
+            //
+            await UserManager.UpdateAsync(user);
+        }
+
+        if (Input.billingState != billingState)
+        {
+            user.BillingState = Input.billingState;
+            flag = true;
+            //
+            await UserManager.UpdateAsync(user);
+        }
+
+        if (Input.billingZip != billingZip)
+        {
+            user.BillingZip = Input.billingZip;
+            flag = true;
+            //
+            await UserManager.UpdateAsync(user);
+        }
+
+        if (Input.billingCountry != billingCountry)
+        {
+            user.BillingCountry = Input.billingCountry;
+            flag = true;
+            //
+            await UserManager.UpdateAsync(user);
+        }
+
+        if (Input.creditCardNo != creditCardNo)
+        {
+            user.CreditCardNo = Input.creditCardNo;
+            flag = true;
+            //
+            await UserManager.UpdateAsync(user);
+        }
+
+        if (Input.creditCardExp != creditCardExp)
+        {
+            user.CreditCardExp = Input.creditCardExp;
+            flag = true;
+            //
+            await UserManager.UpdateAsync(user);
+        }
+
+        if (Input.creditCardCvv != creditCardCvv)
+        {
+            user.CreditCardCvv = Input.creditCardCvv;
+            flag = true;
+            //
+            await UserManager.UpdateAsync(user);
+        }
+
+        if(flag) await UserManager.UpdateAsync(user);
+
+        await SignInManager.RefreshSignInAsync(user);
+        RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
+    }
+
+    private sealed class InputModel
+    {
+
+        [Display(Name = "Billing Address")]
+        public string? billingAddress { get; set; }
+
+        [Display(Name = "Billing City")]
+        public string? billingCity { get; set; }
+
+        [Display(Name = "Billing State")]
+        public string? billingState { get; set; }
+
+        [Display(Name = "Billing Zip")]
+        public string? billingZip { get; set; }
+
+        [Display(Name = "Billing Country")]
+        public string? billingCountry { get; set; }
+
+        [Display(Name = "Credit Card Number")]
+        public string? creditCardNo { get; set; }
+
+        [Display(Name = "Credit Card Expiration")]
+        public string? creditCardExp { get; set; }
+
+        [Display(Name = "Credit Card CVV")]
+        public string? creditCardCvv { get; set; }
+    }
+}
