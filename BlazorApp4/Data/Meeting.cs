@@ -12,6 +12,7 @@ namespace BlazorApp4.Data
         public string? Name { get; set; }
         public DateTime timeDate { get; set; }
         public List<ApplicationUser> Attendees { get; set; }
+        public ApplicationUser Creator { get; set; }
 
     }
 }
