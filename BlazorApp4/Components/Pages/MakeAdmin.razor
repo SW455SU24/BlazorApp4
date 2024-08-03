@@ -1,0 +1,117 @@
+﻿@page "/MakeAdmin"
+@rendermode InteractiveServer
+@using BlazorApp4.Data
+@using Microsoft.AspNetCore.Identity
+@using System.ComponentModel.DataAnnotations
+@using BlazorApp4.Components.Account.Shared
+@inject UserManager<ApplicationUser> UserManager
+@inject ILogger<MakeAdmin> Logger
+
+<PageTitle>Add Room</PageTitle>
+
+<form method="post" @onsubmit="Submit" @formname="starship-plain-form">
+    <AntiforgeryToken />
+    <div>
+        <label>
+            Identifier:
+            <InputText @bind-Value="Model!.Id" />
+        </label>
+    </div>
+    <div>
+        <button type="submit">Submit</button>
+    </div>
+</form>
+
+
+<ul>
+    @if (searchAttempted && user != null)
+    {
+        <h3>Search Results</h3>
+            <li>@user.UserName</li>
+            @if(isAdmin)
+            {
+                <li>Admin</li>
+            <button type="submit" @onclick="DownToUser">Downgrade Role to User</button>
+            }
+            else
+            {
+                <li>Not Admin</li>
+            <div>
+                <button type="submit" @onclick="upToAdmin">Upgrade Role to Administrator</button>
+            </div>
+            }
+    }
+    else if(searchAttempted && user == null)
+    {
+        <li>User not found</li>
+    }
+</ul>
+
+@code {
+    [SupplyParameterFromForm]
+    public Starship? Model { get; set; }
+
+    protected override void OnInitialized() => Model ??= new();
+    bool isAdmin = false;
+    bool searchAttempted = false;
+    bool searchSuccess = false;
+
+    private async Task Submit()
+    {
+        searchAttempted = true;
+        Logger.LogInformation("Id = {Id}", Model?.Id);
+        user = await UserManager.FindByNameAsync(Model?.Id);
+        if(user != null) 
+        {
+            isAdmin = await UserManager.IsInRoleAsync(user, "Admin");
+            searchSuccess = true;
+        }
+        else 
+        {
+            searchSuccess = false;
+        }
+    }
+
+    private async Task upToAdmin()
+    {
+        await UserManager.AddToRoleAsync(user, "Admin");
+        resetForm();
+    }
+
+    private async Task DownToUser()
+    {
+        await UserManager.RemoveFromRoleAsync(user, "Admin");
+        resetForm();
+    }
+
+    private void resetForm()
+    {
+        Model!.Id = null;
+        searchAttempted = false;
+        searchSuccess = false;
+        isAdmin = false;
+        user = null;
+    }
+
+    public class Starship
+    {
+        public string? Id { get; set; }
+    }
+
+    private ApplicationUser user; 
+
+    /*private async Task Submit()
+    {
+        users = new List<ApplicationUser>();// Initialize the list
+        users.Add(await UserManager.FindByNameAsync("gaga@gmail.com"));
+        
+    }*/
+
+    private async Task HandleValidSubmit()
+    {
+        //await RoomService.AddRoomAsync(newRoom);
+        //newRoom = new Room(); // Reset the form
+
+        //rooms = await UsersController.getUsersAsync(); // Refresh the list
+    }
+}
