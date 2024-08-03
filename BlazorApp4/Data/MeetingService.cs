@@ -39,5 +39,15 @@ namespace BlazorApp4.Data
             _context.Meetings.Remove(meeting);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<Meeting>> GetMeetingsByUserAsync(string userId)
+        {
+            return await _context.Meetings.Where(c => c.Creator.Id == userId).ToListAsync();
+        }
+
+        public async Task<List<Meeting>> GetMeetingsByRoomAsync(int roomId)
+        {
+            return await _context.Meetings.Where(c => c.Room.Id == roomId).ToListAsync();
+        }
     }
 }

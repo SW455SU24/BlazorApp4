@@ -39,5 +39,6 @@ namespace BlazorApp4.Data
             _context.Rooms.Remove(room);
             await _context.SaveChangesAsync();
         }
+
     }
 }
