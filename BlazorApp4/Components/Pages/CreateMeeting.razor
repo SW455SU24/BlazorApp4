@@ -8,3 +8,122 @@
 
 <h3>Create Meeting</h3>
 
+<div class="form-group">
+    <label for="roomSelect">Select Room:</label>
+    <select id="roomSelect" class="form-control" @onchange="UpdateAvailableTimes">
+        <option value="">Choose a Room</option>
+        @foreach (var room in rooms)
+        {
+            <option value="@room.Id">@($"Room {room.Id} {(room.IsSpecial ? "(Special)" : "")}")</option>
+        }
+    </select>
+</div>
+
+<div class="form-group">
+    <label for="meetingName">Meeting Name:</label>
+    <input id="meetingName" type="text" class="form-control" @bind="meetingName" placeholder="Enter meeting name" />
+</div>
+
+<div class="form-group">
+    <label for="timeSelect">Select Time:</label>
+    <select id="timeSelect" class="form-control" @bind="selectedTime">
+        <option value="">Choose a Time</option>
+        @foreach (var time in filteredTimes)
+        {
+            <option value="@time">@time.ToString("hh:mm tt")</option>
+        }
+    </select>
+</div>
+
+<button class="btn btn-primary" @onclick="OnCreateMeeting">Create Meeting</button>
+
+@if (successMessage != null)
+{
+    <div class="alert alert-success mt-3">@successMessage</div>
+}
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger mt-3">@errorMessage</div>
+}
+
+@code {
+    private List<Room> rooms = new List<Room>();
+    private string? meetingName;
+    private int? selectedRoomId;
+    private DateTime? selectedTime;
+    private string? successMessage;
+    private string? errorMessage;
+
+    // Define available times from 9 AM to 5 PM in 1-hour increments
+    private List<DateTime> availableTimes = Enumerable.Range(9, 9).Select(hour => DateTime.Today.AddHours(hour)).ToList();
+
+    // This list will hold the times after filtering out booked slots
+    private List<DateTime> filteredTimes = new List<DateTime>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load available rooms
+        rooms = await RoomService.GetRoomsAsync();
+    }
+
+    private async Task UpdateAvailableTimes(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int roomId))
+        {
+            selectedRoomId = roomId;
+
+            // Get existing meetings for the selected room
+            var existingMeetings = await MeetingService.GetMeetingsByRoomAsync(roomId);
+
+            // Filter out the times that are already booked
+            var bookedTimes = existingMeetings.Select(m => m.timeDate).ToHashSet();
+            filteredTimes = availableTimes.Where(time => !bookedTimes.Contains(time)).ToList();
+        }
+        else
+        {
+            selectedRoomId = null;
+            filteredTimes = new List<DateTime>(availableTimes);
+        }
+    }
+
+    private async Task OnCreateMeeting()
+    {
+        if (selectedRoomId == null || selectedTime == null || string.IsNullOrWhiteSpace(meetingName))
+        {
+            errorMessage = "Please fill out all fields.";
+            return;
+        }
+
+        // Check for existing meetings at the same time in the selected room
+        var existingMeetings = await MeetingService.GetMeetingsByRoomAsync(selectedRoomId.Value);
+        if (existingMeetings.Any(m => m.timeDate == selectedTime.Value))
+        {
+            errorMessage = "A meeting is already scheduled in this room at the selected time.";
+            return;
+        }
+
+        var meeting = new Meeting
+            {
+                Name = meetingName,
+                Room = rooms.First(r => r.Id == selectedRoomId),
+                timeDate = selectedTime.Value,
+                Attendees = new List<ApplicationUser>(), // Initialize empty list of attendees
+                Creator = new ApplicationUser { FirstName = "John", LastName = "Doe" } // Replace with current user
+            };
+
+        try
+        {
+            await MeetingService.AddMeetingAsync(meeting);
+            successMessage = "Meeting created successfully!";
+            errorMessage = null; // Clear any previous error messages
+
+            // Update available times after successful creation
+            await UpdateAvailableTimes(new ChangeEventArgs { Value = selectedRoomId.ToString() });
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error creating meeting: {ex.Message}";
+        }
+    }
+}
