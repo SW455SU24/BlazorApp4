@@ -49,6 +49,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<ComplaintService>();
+builder.Services.AddScoped<MeetingService>();
 
 var app = builder.Build();
 
