@@ -1,0 +1,43 @@
+﻿@page "/ResolveComplaints"
+@rendermode InteractiveServer
+@using BlazorApp4.Data
+@inject ComplaintService ComplaintService
+
+<PageTitle>File a Complaint</PageTitle>
+
+<h1>Resolve Complaints</h1>
+
+<ul>
+	@if (complaints != null)
+	{
+		@foreach (var complaint in complaints)
+		{
+			<ul class="list-group list-group-horizontal-lg">
+				<li class="list-group-item">@complaint.Sender?.FirstName @complaint.Sender?.LastName</li>
+				<li class="list-group-item">@complaint.Body</li>
+				<li class="list-group-item flex-fill">
+					<button class="btn btn-primary" @onclick="() => ResolveComplaint(complaint.Id)">Resolve</button>
+				</li>
+			</ul>
+		}
+	}
+	else
+	{
+		<li>Loading...</li>
+	}
+</ul>
+
+@code {
+	private List<Complaint> complaints = new List<Complaint>();
+
+	protected override async Task OnInitializedAsync()
+	{
+		complaints = await ComplaintService.GetComplaintsAsync();
+	}
+
+	private async Task ResolveComplaint(int complaintId)
+	{
+		await ComplaintService.DeleteComplaintAsync(complaintId);
+		complaints = await ComplaintService.GetComplaintsAsync(); // Refresh the list
+	}
+}

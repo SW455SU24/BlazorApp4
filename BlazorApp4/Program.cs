@@ -15,6 +15,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
+{
+    options.DetailedErrors = true;
+});
 
 builder.Services.AddAuthorization(options =>
 {
@@ -48,6 +52,8 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<RoomService>();
+builder.Services.AddScoped<ComplaintService>();
+builder.Services.AddScoped<MeetingService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,33 @@
+﻿@page "/FileComplaint"
+@rendermode InteractiveServer
+@using BlazorApp4.Data
+@inject ComplaintService ComplaintService
+
+
+
+<PageTitle>File a Complaint</PageTitle>
+
+<h1>File a Complaint</h1>
+
+<EditForm Model="newComplaint" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="body">Complaint:</label>
+        <InputTextArea id="body" class="form-control" @bind-Value="newComplaint.Body" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit Complaint</button>
+</EditForm>
+
+@code {
+
+    private Complaint newComplaint = new Complaint();
+
+    private async Task HandleValidSubmit()
+    {
+        await ComplaintService.AddComplaintAsync(newComplaint);
+        newComplaint = new Complaint(); // Reset the form
+    }
+}
