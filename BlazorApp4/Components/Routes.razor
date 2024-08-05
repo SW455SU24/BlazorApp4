@@ -1,4 +1,6 @@
 ﻿@using BlazorApp4.Components.Account.Shared
+@using Microsoft.AspNetCore.Authorization
+@attribute [AllowAnonymous]
 <Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
