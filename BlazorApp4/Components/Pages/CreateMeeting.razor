@@ -1,8 +1,12 @@
 ﻿@page "/CreateMeeting"
 @rendermode InteractiveServer
 @using BlazorApp4.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 @inject MeetingService MeetingService
 @inject RoomService RoomService
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Create a Meeting</PageTitle>
 
@@ -54,6 +58,7 @@
     private DateTime? selectedTime;
     private string? successMessage;
     private string? errorMessage;
+    private ApplicationUser? currentUser;
 
     // Define available times from 9 AM to 5 PM in 1-hour increments
     private List<DateTime> availableTimes = Enumerable.Range(9, 9).Select(hour => DateTime.Today.AddHours(hour)).ToList();
@@ -65,6 +70,15 @@
     {
         // Load available rooms
         rooms = await RoomService.GetRoomsAsync();
+
+        // Get the authentication state
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            currentUser = await UserManager.GetUserAsync(user);
+        }
     }
 
     private async Task UpdateAvailableTimes(ChangeEventArgs e)
@@ -109,7 +123,7 @@
                 Room = rooms.First(r => r.Id == selectedRoomId),
                 timeDate = selectedTime.Value,
                 Attendees = new List<ApplicationUser>(), // Initialize empty list of attendees
-                Creator = new ApplicationUser { FirstName = "John", LastName = "Doe" } // Replace with current user
+                Creator = new ApplicationUser { FirstName = currentUser.FirstName, LastName = currentUser.LastName } // Replace with current user
             };
 
         try
