@@ -5,6 +5,88 @@
 
 <h3>View Meetings</h3>
 
-@code {
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Meeting Name</th>
+            <th>Room</th>
+            <th>Date & Time</th>
+            <th>Attendees</th>
+            <th>Creator</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (meetings != null && meetings.Any())
+        {
+            @foreach (var meeting in meetings)
+            {
+                <tr>
+                    <td>@meeting.Name</td>
+                    <td>
+                        @if (meeting.Room != null)
+                        {
+                            @($"Room {meeting.Room.Id} {(meeting.Room.IsSpecial ? "(Special)" : "")}")
+                        }
+                        else
+                        {
+                            <span>Unknown Room</span>
+                        }
+                    </td>
+                    <td>@meeting.timeDate.ToString("MMMM dd, yyyy hh:mm tt")</td>
+                    <td>
+                        @if (meeting.Attendees != null && meeting.Attendees.Any())
+                        {
+                            @foreach (var attendee in meeting.Attendees)
+                            {
+                                <span>@attendee.FirstName @attendee.LastName, </span>
+                            }
+                        }
+                        else
+                        {
+                            <span>No attendees</span>
+                        }
+                    </td>
+                    <td>
+                        @if (meeting.Creator != null)
+                        {
+                            @($"{meeting.Creator.FirstName} {meeting.Creator.LastName}")
+                        }
+                        else
+                        {
+                            <span>Unknown Creator</span>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5">No meetings scheduled.</td>
+            </tr>
+        }
+    </tbody>
+</table>
 
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@code {
+    private List<Meeting> meetings = new List<Meeting>();
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Load all meetings
+            meetings = await MeetingService.GetMeetingsAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading meetings: {ex.Message}";
+        }
+    }
 }
