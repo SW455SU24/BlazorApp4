@@ -1,0 +1,77 @@
+﻿@page "/RoomAvailability"
+@rendermode InteractiveServer
+@using BlazorApp4.Data
+@inject RoomService RoomService
+@inject MeetingService MeetingService
+
+<h3>Room Availability</h3>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Room</th>
+            <th>Available Times</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var room in rooms)
+        {
+            <tr>
+                <td>@($"Room {room.Id} {(room.IsSpecial ? "(Special)" : "")}")</td>
+                <td>
+                    @if (roomAvailableTimes.TryGetValue(room.Id, out var availableTimes))
+                    {
+                        @foreach (var time in availableTimes)
+                        {
+                            <span class="badge bg-success me-1">@time.ToString("hh:mm tt")</span>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@code {
+    private List<Room> rooms = new List<Room>();
+    private Dictionary<int, List<DateTime>> roomAvailableTimes = new Dictionary<int, List<DateTime>>();
+    private string? errorMessage;
+
+    // Define available times from 9 AM to 5 PM in 1-hour increments
+    private List<DateTime> allTimes = Enumerable.Range(9, 9)
+        .Select(hour => DateTime.Today.AddHours(hour))
+        .ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Load available rooms
+            rooms = await RoomService.GetRoomsAsync();
+
+            foreach (var room in rooms)
+            {
+                // Get existing meetings for the room
+                var existingMeetings = await MeetingService.GetMeetingsByRoomAsync(room.Id);
+
+                // Extract booked times
+                var bookedTimes = existingMeetings.Select(m => m.timeDate).ToHashSet();
+
+                // Calculate available times
+                var availableTimes = allTimes.Where(time => !bookedTimes.Contains(time)).ToList();
+
+                // Store available times in the dictionary
+                roomAvailableTimes[room.Id] = availableTimes;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading room availability: {ex.Message}";
+        }
+    }
+}

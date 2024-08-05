@@ -24,7 +24,11 @@ namespace BlazorApp4.Data
 
         public async Task<List<Meeting>> GetMeetingsAsync()
         {
-            return await _context.Meetings.ToListAsync();
+            return await _context.Meetings
+        .Include(m => m.Creator) // Ensure Creator is included
+        .Include(m => m.Room)    // Include Room for completeness
+        .Include(m => m.Attendees) // Include Attendees if needed
+        .ToListAsync();
         }
 
         public async Task UpdateMeetingAsync(Meeting meeting)
