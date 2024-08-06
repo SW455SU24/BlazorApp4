@@ -1,9 +1,37 @@
 ﻿@page "/ViewMeetings"
 @rendermode InteractiveServer
 @using BlazorApp4.Data
+@using Microsoft.AspNetCore.Identity
 @inject MeetingService MeetingService
+@inject RoomService RoomService
+@inject UserManager<ApplicationUser> UserManager
 
 <h3>View Meetings</h3>
+
+<div class="filters">
+    <label>Filter by Room:</label>
+    <select @bind="selectedRoom">
+        <option value="">All Rooms</option>
+        @foreach (var room in rooms)
+        {
+            <option value="@room.Id">@($"Room {room.Id} {(room.IsSpecial ? "(Special)" : "")}")</option>
+        }
+    </select>
+
+    <label>Filter by Date:</label>
+    <input type="date" @bind="selectedDate" />
+
+    <label>Filter by User:</label>
+    <select @bind="selectedUser">
+        <option value="">All Users</option>
+        @foreach (var user in users)
+        {
+            <option value="@user.Id">@user.FirstName @user.LastName</option>
+        }
+    </select>
+
+    <button @onclick="ApplyFilters">Apply Filters</button>
+</div>
 
 <table class="table table-striped">
     <thead>
@@ -16,11 +44,11 @@
         </tr>
     </thead>
     <tbody>
-        @if (meetings != null && meetings.Any())
+        @if (filteredMeetings != null && filteredMeetings.Any())
         {
-            @foreach (var meeting in meetings)
+            @foreach (var meeting in filteredMeetings)
             {
-                <tr>
+                <tr @onclick="() => SelectMeeting(meeting)" class="@(selectedMeeting == meeting ? "table-active" : "")">
                     <td>@meeting.Name</td>
                     <td>
                         @if (meeting.Room != null)
@@ -68,6 +96,36 @@
     </tbody>
 </table>
 
+@if (selectedMeeting != null)
+{
+    <form method="post" @onsubmit="InviteSearch" @formname="starship-plain-form">
+        <AntiforgeryToken />
+        <div>
+            <label>
+                Identifier:
+                <InputText @bind-Value="attendeeName" />
+            </label>
+        </div>
+        <div>
+            <button type="submit">Search</button>
+        </div>
+    </form>
+}
+
+<ul>
+    @if(searchAttempted && invitedUser != null)
+    {
+        <h3>Search Results</h3>
+        <li>@invitedUser.UserName</li>
+        <button type="submit" @onclick="InviteSubmit">Invite</button>
+    }
+    else if(searchAttempted && invitedUser == null)
+    {
+        <li>User not found</li>
+    }
+</ul>
+
+
 @if (errorMessage != null)
 {
     <div class="alert alert-danger">@errorMessage</div>
@@ -75,18 +133,75 @@
 
 @code {
     private List<Meeting> meetings = new List<Meeting>();
+    private List<Meeting> filteredMeetings = new List<Meeting>();
+    private List<Room> rooms = new List<Room>();
+    private List<ApplicationUser> users = new List<ApplicationUser>();
     private string? errorMessage;
+
+    private string selectedRoom = "";
+    private DateTime? selectedDate;
+    private string selectedUser = "";
+    private Meeting? selectedMeeting;
+    private string? attendeeName;
+    private bool searchAttempted = false;
+    private bool searchSuccess = false;
+    private ApplicationUser? invitedUser;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-            // Load all meetings
+            // Load all meetings, rooms, and users
             meetings = await MeetingService.GetMeetingsAsync();
+            rooms = await RoomService.GetRoomsAsync();
+            users = UserManager.Users.ToList();
+
+
+            // Initially, display all meetings
+            filteredMeetings = meetings;
         }
         catch (Exception ex)
         {
-            errorMessage = $"Error loading meetings: {ex.Message}";
+            errorMessage = $"Error loading data: {ex.Message}";
         }
+    }
+
+    private void SelectMeeting(Meeting meeting)
+    {
+        selectedMeeting = meeting;
+    }
+
+    private void InviteSearch()
+    {
+        searchAttempted = true;
+        invitedUser = users.FirstOrDefault(u => u.UserName == attendeeName);
+        if (invitedUser == null)
+        {
+            errorMessage = "User not found.";
+            return;
+        }
+        else
+        {
+            searchSuccess = true;
+        }
+    }
+
+
+
+    private void ApplyFilters()
+    {
+        int selectedRoomId;
+        bool isRoomSelected = int.TryParse(selectedRoom, out selectedRoomId);
+
+        filteredMeetings = meetings.Where(m =>
+            (!isRoomSelected || m.Room?.Id == selectedRoomId) &&
+            (!selectedDate.HasValue || m.timeDate.Date == selectedDate.Value.Date) &&
+            (string.IsNullOrEmpty(selectedUser) || m.Creator?.Id == selectedUser)
+        ).ToList();
+    }
+    private void InviteSubmit()
+    {
+        selectedMeeting.Attendees.Add(invitedUser);
+        MeetingService.UpdateMeetingAsync(selectedMeeting);
     }
 }

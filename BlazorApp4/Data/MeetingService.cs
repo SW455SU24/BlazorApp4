@@ -17,6 +17,13 @@ namespace BlazorApp4.Data
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddAttendeeAsync(Meeting meeting, ApplicationUser attendee)
+        {
+            meeting.Attendees.Add(attendee);
+            _context.Entry(meeting).State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<Meeting> GetMeetingAsync(int id)
         {
             return await _context.Meetings.FindAsync(id);

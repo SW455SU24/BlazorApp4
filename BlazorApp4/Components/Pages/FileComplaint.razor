@@ -1,7 +1,12 @@
 ﻿@page "/FileComplaint"
 @rendermode InteractiveServer
 @using BlazorApp4.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 @inject ComplaintService ComplaintService
+
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 
 
@@ -22,11 +27,18 @@
 </EditForm>
 
 @code {
-
     private Complaint newComplaint = new Complaint();
+    private ApplicationUser? currentUser;
 
     private async Task HandleValidSubmit()
     {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            currentUser = await UserManager.GetUserAsync(user);
+        }
+        newComplaint.Sender = currentUser;
         await ComplaintService.AddComplaintAsync(newComplaint);
         newComplaint = new Complaint(); // Reset the form
     }
