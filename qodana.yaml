@@ -1,1 +1,27 @@
 
+version: "1.0"
+profile:
+  name: qodana.starter
+include:
+  - name: AutoPropertyCanBeMadeGetOnly.Local
+  - name: FieldCanBeMadeReadOnly.Local
+  - name: MemberCanBeMadeStatic.Local
+  - name: PropertyCanBeMadeInitOnly.Global
+  - name: PropertyCanBeMadeInitOnly.Local
+  - name: ConvertIfStatementToSwitchStatement
+  - name: ConvertToPrimaryConstructor
+  - name: InlineOutVariableDeclaration
+  - name: LoopCanBeConvertedToQuery
+  - name: UseCollectionExpression
+  - name: RedundantIfElseBlock
+  - name: UnusedMethodReturnValue.Global
+  - name: UnusedMember.Global
+  - name: ASP0025
+  - name: CA1859
+  - name: ArrangeRedundantParentheses
+  - name: BuiltInTypeReferenceStyle
+  - name: SuggestVarOrType_BuiltInTypes
+  - name: ArrangeNamespaceBody
+  - name: ArrangeTrailingCommaInMultilineLists
+  - name: ArrangeObjectCreationWhenTypeEvident
+  - name: ArrangeObjectCreationWhenTypeNotEvident
