@@ -44,7 +44,7 @@
         </tr>
     </thead>
     <tbody>
-        @if (filteredMeetings != null && filteredMeetings.Any())
+        @if (filteredMeetings.Any())
         {
             @foreach (var meeting in filteredMeetings)
             {
@@ -143,8 +143,8 @@
     private string selectedUser = "";
     private Meeting? selectedMeeting;
     private string? attendeeName;
-    private bool searchAttempted = false;
-    private bool searchSuccess = false;
+    private bool searchAttempted;
+    private bool searchSuccess;
     private ApplicationUser? invitedUser;
 
     protected override async Task OnInitializedAsync()
@@ -178,7 +178,6 @@
         if (invitedUser == null)
         {
             errorMessage = "User not found.";
-            return;
         }
         else
         {
@@ -194,9 +193,9 @@
         bool isRoomSelected = int.TryParse(selectedRoom, out selectedRoomId);
 
         filteredMeetings = meetings.Where(m =>
-            (!isRoomSelected || m.Room?.Id == selectedRoomId) &&
+            (!isRoomSelected || m.Room.Id == selectedRoomId) &&
             (!selectedDate.HasValue || m.timeDate.Date == selectedDate.Value.Date) &&
-            (string.IsNullOrEmpty(selectedUser) || m.Creator?.Id == selectedUser)
+            (string.IsNullOrEmpty(selectedUser) || m.Creator.Id == selectedUser)
         ).ToList();
     }
     private void InviteSubmit()

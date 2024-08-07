@@ -52,9 +52,9 @@
     public Starship? Model { get; set; }
 
     protected override void OnInitialized() => Model ??= new();
-    bool isAdmin = false;
-    bool searchAttempted = false;
-    bool searchSuccess = false;
+    bool isAdmin;
+    bool searchAttempted;
+    bool searchSuccess;
 
     private async Task Submit()
     {
@@ -100,18 +100,4 @@
 
     private ApplicationUser user; 
 
-    /*private async Task Submit()
-    {
-        users = new List<ApplicationUser>();// Initialize the list
-        users.Add(await UserManager.FindByNameAsync("gaga@gmail.com"));
-        
-    }*/
-
-    private async Task HandleValidSubmit()
-    {
-        //await RoomService.AddRoomAsync(newRoom);
-        //newRoom = new Room(); // Reset the form
-
-        //rooms = await UsersController.getUsersAsync(); // Refresh the list
-    }
 }
