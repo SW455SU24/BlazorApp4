@@ -41,7 +41,6 @@ namespace Microsoft.AspNetCore.Routing
             });
 
             accountGroup.MapPost("/Logout", async (
-                ClaimsPrincipal user,
                 SignInManager<ApplicationUser> signInManager,
                 [FromForm] string returnUrl) =>
             {
