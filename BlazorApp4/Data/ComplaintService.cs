@@ -13,9 +13,7 @@ namespace BlazorApp4.Data
         }
 
         public async Task AddComplaintAsync(Complaint complaint)
-        {
-            //complaint.Sender = new ApplicationUser { FirstName = "John", LastName = "Doe" }; // Using temp name, need to figure out how to grab current account
-            
+        {            
             _context.Complaints.Add(complaint);
             await _context.SaveChangesAsync();
         }
@@ -27,8 +25,9 @@ namespace BlazorApp4.Data
 
         public async Task<List<Complaint>> GetComplaintsAsync()
         {
-            return await _context.Complaints.ToListAsync();
+            return await _context.Complaints.Include(c => c.Sender).ToListAsync();
         }
+
 
         public async Task UpdateComplaintAsync(Complaint complaint)
         {
