@@ -1,9 +1,12 @@
-﻿@page "/MakeAdmin"
+﻿
+@page "/MakeAdmin"
 @rendermode InteractiveServer
 @using BlazorApp4.Data
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using System.ComponentModel.DataAnnotations
 @using BlazorApp4.Components.Account.Shared
+@attribute [Authorize(Roles = "Admin")]
 @inject UserManager<ApplicationUser> UserManager
 @inject ILogger<MakeAdmin> Logger
 

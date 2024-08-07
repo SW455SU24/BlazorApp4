@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @using BlazorApp4.Data
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
 @inject MeetingService MeetingService
 @inject RoomService RoomService
 @inject UserManager<ApplicationUser> UserManager
