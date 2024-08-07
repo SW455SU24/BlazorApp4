@@ -1,6 +1,34 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@using BlazorApp4.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<h1>Hello, @(currentUser?.FirstName ?? "Guest")!</h1>
+<h2>Welcome to Meeting Managed</h2>
 
-Welcome to your new app.
+<p>File a Complaint - Used to inform an administrator of suggestions or problems</p>
+<p>Add Room - Used to create a new room to hold meetings in</p>
+<p>Create Meeting - Used to schedule a meeting</p>
+<p>Room Availability - Check to see what time slots are available for each room</p>
+<p>*Additional admin features will be covered under the help section*</p>
+
+@code {
+    private ApplicationUser? currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get the authentication state
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            currentUser = await UserManager.GetUserAsync(user);
+        }
+    }
+ }
