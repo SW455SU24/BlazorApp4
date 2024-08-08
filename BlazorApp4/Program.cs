@@ -56,6 +56,14 @@ builder.Services.AddScoped<RoomService>();
 builder.Services.AddScoped<ComplaintService>();
 builder.Services.AddScoped<MeetingService>();
 
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    // Default Lockout settings.
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 3;
+    options.Lockout.AllowedForNewUsers = true;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

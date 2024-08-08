@@ -25,7 +25,14 @@
     {
         @foreach (var room in rooms)
         {
-            <li>@room.Id</li>
+            @if(room.IsSpecial)
+            {
+                <li>@room.Id (Special)</li>
+            }
+            else
+            {
+                <li>@room.Id</li>
+            }
         }
     }
     else
